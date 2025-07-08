@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preventing Fraud in a FinTech Startup</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font for a clean look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f0f0; /* Light background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        /* Primary color for highlights */
+        .primary-yellow {
+            background-color: #ffff00;
+        }
+        .text-primary-yellow {
+            color: #ffff00;
+        }
+        .border-primary-yellow {
+            border-color: #ffff00;
+        }
+        /* Custom button styling */
+        .scenario-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .scenario-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .scenario-button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        /* Impact meter styling */
+        .impact-meter-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e0e0e0;
+            overflow: hidden;
+        }
+        .impact-meter-fill {
+            height: 100%;
+            background-color: #4CAF50; /* Green for positive */
+            transition: width 0.5s ease-in-out;
+        }
+        .impact-meter-fill.neutral {
+            background-color: #FFA500; /* Orange for neutral */
+        }
+        .impact-meter-fill.negative {
+            background-color: #FF4500; /* Red for negative */
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="scenario-container" class="bg-white p-8 md:p-12 rounded-xl shadow-lg max-w-3xl w-full border-t-8 border-primary-yellow">
+        <h1 id="scenario-title" class="text-3xl md:text-4xl font-bold mb-6 text-center text-gray-800"></h1>
+        <p id="scenario-text" class="text-lg md:text-xl text-gray-700 mb-8 text-center leading-relaxed"></p>
+
+        <div id="impact-meters" class="mt-6 mb-8 p-4 bg-gray-50 rounded-lg shadow-sm hidden">
+            <h2 class="text-xl font-semibold mb-3 text-gray-800 text-center">Current Impact</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="text-center">
+                    <p class="font-medium text-gray-700">Trust <span id="trust-emoji">🔒</span></p>
+                    <div class="impact-meter-bar w-full">
+                        <div id="trust-fill" class="impact-meter-fill" style="width: 50%;"></div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <p class="font-medium text-gray-700">Detection Accuracy <span id="accuracy-emoji">🎯</span></p>
+                    <div class="impact-meter-bar w-full">
+                        <div id="accuracy-fill" class="impact-meter-fill" style="width: 50%;"></div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <p class="font-medium text-gray-700">User Experience <span id="ux-emoji">🙂</span></p>
+                    <div class="impact-meter-bar w-full">
+                        <div id="ux-fill" class="impact-meter-fill" style="width: 50%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Options will be dynamically loaded here -->
+        </div>
+
+        <div id="debrief-container" class="mt-8 p-6 bg-gray-50 rounded-lg shadow-md hidden">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800 text-center">Debrief: Your Fraud Prevention Strategy</h2>
+            <div id="debrief-choices" class="mb-6 text-gray-700">
+                <!-- Choices will be summarized here -->
+            </div>
+            <h3 class="text-xl font-semibold mb-3 text-gray-800 text-center">Further Reflection:</h3>
+            <p class="text-gray-700 text-center">How would you balance fraud prevention with financial access and user dignity?</p>
+            <p class="text-sm text-gray-500 text-center mt-2">
+                (Consider discussing this with peers or researching "financial inclusion and fraud" for more insights.)
+            </p>
+        </div>
+
+        <div id="restart-container" class="mt-8 text-center hidden">
+            <button id="restart-button" class="primary-yellow text-gray-900 font-semibold py-3 px-8 rounded-full shadow-md hover:shadow-lg scenario-button text-lg">
+                Restart Scenario
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Define the scenario data structure
+        const scenarioData = {
+            "intro": {
+                "title": "Preventing Fraud in a FinTech Startup",
+                "text": "Welcome, Fraud Risk Analyst! Your mission is to build a robust fraud prevention strategy for our growing FinTech platform, which offers peer-to-peer payments, savings, and small business loans. Your decisions will impact customer trust, fraud detection effectiveness, and user experience. Let's begin!",
+                "next": "branch1"
+            },
+            "branch1": {
+                "question": "Choose the fraud vector to address first:",
+                "options": [
+                    {
+                        "id": "A", "text": "Fake identities during onboarding",
+                        "description": "Real-world scenario: A surge in new accounts using stolen or fabricated identities is leading to chargebacks and regulatory fines. This impacts our reputation and financial stability.",
+                        "next": "branch2", "impact": { "trust": 0, "accuracy": 1, "ux": 0 }
+                    },
+                    {
+                        "id": "B", "text": "Account takeovers (ATO)",
+                        "description": "Real-world scenario: Customers are reporting unauthorized transactions after their accounts were compromised via phishing or credential stuffing. This erodes user trust rapidly.",
+                        "next": "branch2", "impact": { "trust": -1, "accuracy": 1, "ux": -1 }
+                    },
+                    {
+                        "id": "C", "text": "Loan fraud using synthetic profiles",
+                        "description": "Real-world scenario: Organized fraud rings are creating sophisticated synthetic identities to apply for and default on small business loans, leading to significant financial losses.",
+                        "next": "branch2", "impact": { "trust": 0, "accuracy": 1, "ux": 0 }
+                    }
+                ]
+            },
+            "branch2": {
+                "question": "Select a fraud detection strategy:",
+                "options": [
+                    {
+                        "id": "A", "text": "Rule-based detection (thresholds, flags, limits)",
+                        "description": "Pros/Cons: Relatively low cost to implement, easy to understand. Can be rigid and prone to false positives or easily bypassed by sophisticated fraudsters. Requires constant manual updates.",
+                        "next": "branch3", "impact": { "trust": 0, "accuracy": 0, "ux": -1 }
+                    },
+                    {
+                        "id": "B", "text": "Machine learning models trained on transaction data",
+                        "description": "Pros/Cons: High accuracy potential, adapts to new fraud patterns. High initial cost and data requirements. Risk of bias if training data is unrepresentative, and 'black box' nature can make explainability difficult.",
+                        "next": "branch3", "impact": { "trust": 1, "accuracy": 2, "ux": 0 }
+                    },
+                    {
+                        "id": "C", "text": "Partnering with a third-party fraud detection API",
+                        "description": "Pros/Cons: Quick implementation, leverages external expertise and data. Ongoing subscription costs. Less control over the 'black box' logic, potential data privacy concerns, and reliance on an external vendor.",
+                        "next": "branch3", "impact": { "trust": 0, "accuracy": 1, "ux": 1 }
+                    }
+                ]
+            },
+            "branch3": {
+                "question": "Choose a user communication approach:",
+                "options": [
+                    {
+                        "id": "A", "text": "In-app warnings and prompts",
+                        "description": "Outcomes: Users are informed and can take action, fostering transparency. Can lead to user fatigue if too frequent, and may not reach all users (e.g., those not actively in the app). False positive risk: Moderate.",
+                        "next": "branch4", "impact": { "trust": 1, "accuracy": 0, "ux": 0 }
+                    },
+                    {
+                        "id": "B", "text": "Mandatory verification after suspicious activity",
+                        "description": "Outcomes: High security, directly involves the user in protecting their account. Can be highly disruptive and frustrating for legitimate users, leading to high user friction and abandonment. False positive risk: High user frustration if false positive.",
+                        "next": "branch4", "impact": { "trust": 0, "accuracy": 1, "ux": -2 }
+                    },
+                    {
+                        "id": "C", "text": "Silent background monitoring unless fraud is detected",
+                        "description": "Outcomes: Minimal user friction, seamless experience for legitimate users. Users may feel less secure if they don't see active protection. If fraud does occur, it can feel like the platform wasn't doing enough. False positive risk: Low visible impact, but high internal risk if detection is poor.",
+                        "next": "branch4", "impact": { "trust": -1, "accuracy": 0, "ux": 2 }
+                    }
+                ]
+            },
+            "branch4": {
+                "question": "Prioritize one ethical concern:",
+                "options": [
+                    {
+                        "id": "A", "text": "Over-blocking users from marginalized groups",
+                        "description": "Reflective summary: Prioritizing this means you'll invest heavily in bias detection and mitigation in your models and rules. Policies will emphasize human review for edge cases, ensuring financial access isn't unfairly denied based on demographics or location, even if it slightly increases operational overhead.",
+                        "end": true, "impact": { "trust": 2, "accuracy": -1, "ux": 1 }
+                    },
+                    {
+                        "id": "B", "text": "Transparency about risk scoring",
+                        "description": "Reflective summary: Choosing transparency means developing clear, understandable explanations for why a transaction was flagged or an account restricted. This builds user trust but might give fraudsters insights into your detection methods. It requires clear communication channels and dedicated support.",
+                        "end": true, "impact": { "trust": 1, "accuracy": -1, "ux": 0 }
+                    },
+                    {
+                        "id": "C", "text": "Privacy of biometric or behavioral data",
+                        "description": "Reflective summary: Focusing on privacy means strict data anonymization, minimal data collection, and robust security protocols for sensitive user data. While enhancing trust, it might limit the effectiveness of advanced behavioral analytics for fraud detection, potentially requiring alternative methods.",
+                        "end": true, "impact": { "trust": 2, "accuracy": -1, "ux": 1 }
+                    }
+                ]
+            },
+            // Define a specific debrief state
+            "debrief": {
+                "title": "Strategy Complete!",
+                "text": "" // This will be dynamically populated by displayDebrief
+            }
+        };
+
+        let currentBranchId = "intro"; // Start with the introduction
+        let userSelections = {}; // Store user's choices {branchId: {text: "...", description: "..."}}
+        let currentImpact = { trust: 0, accuracy: 0, ux: 0 }; // Initial neutral impact
+
+        // Get DOM elements
+        const scenarioTitle = document.getElementById("scenario-title");
+        const scenarioText = document.getElementById("scenario-text");
+        const optionsContainer = document.getElementById("options-container");
+        const restartContainer = document.getElementById("restart-container");
+        const restartButton = document.getElementById("restart-button");
+        const impactMetersContainer = document.getElementById("impact-meters");
+        const trustFill = document.getElementById("trust-fill");
+        const accuracyFill = document.getElementById("accuracy-fill");
+        const uxFill = document.getElementById("ux-fill");
+        const trustEmoji = document.getElementById("trust-emoji");
+        const accuracyEmoji = document.getElementById("accuracy-emoji");
+        const uxEmoji = document.getElementById("ux-emoji");
+        const debriefContainer = document.getElementById("debrief-container");
+        const debriefChoices = document.getElementById("debrief-choices");
+
+        // Max possible positive impact for scaling meter bars
+        const MAX_IMPACT_VALUE = 2 * 4; // Max impact per choice (2) * number of branches (4)
+        const MIN_IMPACT_VALUE = -2 * 4; // Min impact per choice (-2) * number of branches (4)
+
+        /**
+         * Maps an impact score to a percentage for the meter bar.
+         * Normalizes the score from MIN_IMPACT_VALUE to MAX_IMPACT_VALUE to a 0-100% range.
+         * @param {number} score - The current impact score.
+         * @returns {number} Percentage (0-100).
+         */
+        function getImpactPercentage(score) {
+            // Shift the range so min_impact_value becomes 0
+            const shiftedScore = score - MIN_IMPACT_VALUE;
+            const shiftedMax = MAX_IMPACT_VALUE - MIN_IMPACT_VALUE;
+            return (shiftedScore / shiftedMax) * 100;
+        }
+
+        /**
+         * Determines the color class for the impact meter fill based on score.
+         * @param {number} score - The current impact score.
+         * @returns {string} CSS class name (positive, neutral, negative).
+         */
+        function getImpactColorClass(score) {
+            if (score > 0) return ''; // Default green
+            if (score === 0) return 'neutral'; // Orange
+            return 'negative'; // Red
+        }
+
+        /**
+         * Updates the visual impact meters based on currentImpact scores.
+         */
+        function updateImpactMeters() {
+            impactMetersContainer.classList.remove('hidden');
+
+            // Update fill width and color
+            trustFill.style.width = `${getImpactPercentage(currentImpact.trust)}%`;
+            trustFill.className = `impact-meter-fill ${getImpactColorClass(currentImpact.trust)}`;
+
+            accuracyFill.style.width = `${getImpactPercentage(currentImpact.accuracy)}%`;
+            accuracyFill.className = `impact-meter-fill ${getImpactColorClass(currentImpact.accuracy)}`;
+
+            uxFill.style.width = `${getImpactPercentage(currentImpact.ux)}%`;
+            uxFill.className = `impact-meter-fill ${getImpactColorClass(currentImpact.ux)}`;
+
+            // Update emojis (optional, but adds visual flair)
+            trustEmoji.textContent = currentImpact.trust >= 1 ? '✅' : (currentImpact.trust <= -1 ? '❌' : '🔒');
+            accuracyEmoji.textContent = currentImpact.accuracy >= 1 ? '✅' : (currentImpact.accuracy <= -1 ? '❌' : '🎯');
+            uxEmoji.textContent = currentImpact.ux >= 1 ? '😊' : (currentImpact.ux <= -1 ? '🙁' : '🙂');
+        }
+
+        /**
+         * Renders the current scenario branch (introduction, question, or ending).
+         */
+        function renderScenario() {
+            const currentBranch = scenarioData[currentBranchId];
+
+            // Clear previous content and hide end screens
+            optionsContainer.innerHTML = '';
+            restartContainer.classList.add('hidden');
+            debriefContainer.classList.add('hidden');
+            impactMetersContainer.classList.add('hidden'); // Hide meters until a choice is made
+
+            if (currentBranchId === "intro") {
+                scenarioTitle.textContent = currentBranch.title;
+                scenarioText.textContent = currentBranch.text;
+                const startButton = document.createElement("button");
+                startButton.textContent = "Start Building Strategy";
+                startButton.className = "primary-yellow text-gray-900 font-semibold py-3 px-8 rounded-full shadow-md hover:shadow-lg scenario-button text-lg w-full md:w-auto mx-auto block";
+                startButton.onclick = () => selectOption(currentBranch.next, null, null, null);
+                optionsContainer.appendChild(startButton);
+                currentImpact = { trust: 0, accuracy: 0, ux: 0 }; // Reset impact for new game
+            } else if (currentBranchId === "debrief") { // Explicitly handle the debrief state
+                scenarioTitle.textContent = currentBranch.title;
+                // Display the reflective summary for the *last* choice made
+                const lastBranchKey = "branch4";
+                if (userSelections[lastBranchKey]) {
+                    const summary = scenarioData[lastBranchKey].options.find(opt => opt.text === userSelections[lastBranchKey].text)?.description;
+                    if (summary) {
+                        scenarioText.textContent = summary;
+                    } else {
+                        scenarioText.textContent = ""; // Clear if no summary found
+                    }
+                } else {
+                    scenarioText.textContent = ""; // Clear if no branch4 selection
+                }
+
+                updateImpactMeters(); // Show final impact
+                debriefContainer.classList.remove('hidden'); // Show debrief
+                displayDebrief(); // Populate debrief content
+                restartContainer.classList.remove('hidden'); // Show restart button
+            }
+            else if (currentBranch.options) { // This handles all question branches
+                scenarioTitle.textContent = currentBranch.question;
+                scenarioText.textContent = ""; // Clear text for questions
+
+                currentBranch.options.forEach(option => {
+                    const buttonContainer = document.createElement("div");
+                    buttonContainer.className = "flex flex-col items-center p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200";
+
+                    const button = document.createElement("button");
+                    button.textContent = `${option.id}. ${option.text}`;
+                    button.className = "primary-yellow text-gray-900 font-semibold py-3 px-6 rounded-full shadow-md hover:shadow-lg scenario-button text-lg w-full mb-2";
+                    button.onclick = () => selectOption(option.next || option.end, option.text, option.description, option.impact);
+
+                    const description = document.createElement("p");
+                    description.textContent = option.description;
+                    description.className = "text-sm text-gray-600 text-center mt-2";
+
+                    buttonContainer.appendChild(button);
+                    buttonContainer.appendChild(description);
+                    optionsContainer.appendChild(buttonContainer);
+                });
+                // Show impact meters after the first choice is made
+                if (Object.keys(userSelections).length > 0) {
+                    updateImpactMeters();
+                }
+            }
+        }
+
+        /**
+         * Handles the selection of an option.
+         * @param {string|boolean} nextId - The ID of the next branch or true if it's the end.
+         * @param {string} selectedText - The text of the chosen option.
+         * @param {string} selectedDescription - The description of the chosen option.
+         * @param {object} impact - The impact object for the selected option.
+         */
+        function selectOption(nextId, selectedText, selectedDescription, impact) {
+            // Store the selection and update impact
+            if (currentBranchId !== "intro" && selectedText) {
+                userSelections[currentBranchId] = { text: selectedText, description: selectedDescription };
+                if (impact) {
+                    currentImpact.trust += impact.trust;
+                    currentImpact.accuracy += impact.accuracy;
+                    currentImpact.ux += impact.ux;
+                }
+            }
+
+            if (nextId === true) { // This means it's the end of the scenario
+                currentBranchId = "debrief"; // Set to the specific debrief state
+                renderScenario();
+            } else if (scenarioData[nextId]) {
+                currentBranchId = nextId;
+                renderScenario();
+            }
+        }
+
+        /**
+         * Populates the debrief container with chosen options.
+         */
+        function displayDebrief() {
+            debriefChoices.innerHTML = `
+                <p><span class="font-semibold">Fraud Vector:</span> ${userSelections.branch1 ? userSelections.branch1.text : 'N/A'}</p>
+                <p><span class="font-semibold">Detection Strategy:</span> ${userSelections.branch2 ? userSelections.branch2.text : 'N/A'}</p>
+                <p><span class="font-semibold">User Communication:</span> ${userSelections.branch3 ? userSelections.branch3.text : 'N/A'}</p>
+                <p><span class="font-semibold">Ethical Concern:</span> ${userSelections.branch4 ? userSelections.branch4.text : 'N/A'}</p>
+            `;
+        }
+
+        // Event listener for the restart button
+        restartButton.addEventListener("click", () => {
+            currentBranchId = "intro"; // Reset to introduction
+            userSelections = {}; // Clear selections
+            currentImpact = { trust: 0, accuracy: 0, ux: 0 }; // Reset impact
+            renderScenario(); // Re-render the scenario
+        });
+
+        // Initial render when the page loads
+        window.onload = renderScenario;
+    </script>
+</body>
+</html>
